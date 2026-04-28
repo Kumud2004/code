@@ -1,0 +1,90 @@
+% Max z=x1+2x2+3x
+
+
+% s.t.
+% x1+2x2<=20
+% 3x1+4x3<=30
+% x1,x2,x3>=0
+% Standard form:
+% Max z=x1+2x2+3x3+0x4+0x5
+% s.t.
+% x1+2x2+x4=20
+% 3x1+4x3+x5=30
+% x1,x2,x3,x4,x5>=0
+
+
+]'
+']
+]'';]
+';];]';
+?'
+:?
+:?
+']
+'
+]'
+]
+
+/
+
+'
+[
+'
+:?'?
+\
+% f(Xb)=objective function vaue at current table
+
+clc;
+clear all;
+C=[1 2 3 0 0];
+A=[1 2 0 1 0;3 0 4 0 1];
+b=[20; 30];
+m=size(A,1); % no. of constraints
+n=size(A,2); % no. of variables
+Y=[A b];
+bv_index=n-m+1:n; % = [4 5] % only when we write starting basic varibales on the right hand side of table
+for s=1:50
+    Xb=Y(:,end);% in place of end you can also write n+1
+    Cb=C(bv_index);
+    % Calculate the objective function '
+]'
+value at the current basic feasible solution
+    Z=Cb*Xb; % here Cb is row and Xb is column vector
+    ZjCj=Cb*Y(:,1:n)-C;
+    table=[ZjCj Z;Y];
+    disp("Table "+s+":")
+    disp(table)
+    % Since it is max prob, so all ZjCj should be >=0
+    if(ZjCj>=0) %<= for min prob
+        disp("Optimal sol.:")
+        disp(Xb)
+        disp("Optimal value:")
+        disp(Z)
+        break
+    else
+        %For max, most negative ZjCj will enter into basis
+        [a EV]=min(ZjCj);% max(ZjCj) for min prob
+        if (Y(:,EV)<=0)
+            disp('Unbounded Solution')
+            break
+        else
+            for j=1:m
+                if (Y(j,EV)>0)
+                    ratio(j)=Xb(j)/Y(j,EV);
+                else
+                    ratio(j) = inf; % Set to infinity if Y(j, EV) <= 0
+                end
+            end
+        end
+        % Determine the entering variable and update the basis
+        [k, LV] = min(ratio);
+        bv_index(LV) = EV; % Update basic variable index
+    end
+    pivot=Y(LV,EV);
+    Y(LV,:)=Y(LV,:)/pivot; % Pivot row normalization
+    for i=1:m
+        if i~=LV
+            Y(i,:)=Y(i,:)-Y(i,EV)*Y(LV,:); % Row operations
+        end
+    end
+end
