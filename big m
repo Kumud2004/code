@@ -1,0 +1,71 @@
+% Max z=x1+x2
+% s.t.
+% x1+x2=4
+% x1+2x2>=6
+% x1,x2>=0
+%
+% Standard form:
+% Max z=x1+x2-0x3-Mx4-Mx5
+% s.t.
+% x1+x2+x4=4
+% x1+2x2-x3+x5=6
+% x1,x2,x3,x4,x5>=0
+
+clc;
+clear all;
+M=10000;
+C=[1 1 0 -M -M];
+A=[1 1 0 1 0;1 2 -1 0 1];
+b=[4; 6];
+m=size(A,1);
+n=size(A,2);
+Y=[A b];
+bv_index=[4 5];
+
+for s=1:50
+    Xb=Y(:,end);
+    Cb=C(bv_index);
+    Z=Cb*Xb;
+    ZjCj=Cb*Y(:,1:n)-C;
+    table=[ZjCj Z;Y];
+    disp("Table "+s+":")
+    disp(table)
+
+    if all(ZjCj>=0)
+        sol=zeros(1,n);
+        sol(bv_index)=Xb;
+        disp("Optimal sol.:")
+        disp(sol)
+        disp("Optimal value:")
+        disp(Z)
+        if any(sol(4:5)>0)
+            disp("Infeasible solution")
+        end
+        break
+    else
+        [a EV]=min(ZjCj);
+        if all(Y(:,EV)<=0)
+            disp('Unbounded Solution')
+            break
+        else
+            ratio=zeros(1,m);
+            for j=1:m
+                if (Y(j,EV)>0)
+                    ratio(j)=Xb(j)/Y(j,EV);
+                else
+                    ratio(j)=inf;
+                end
+            end
+        end
+        [k, LV] = min(ratio);
+        bv_index(LV) = EV;
+    end
+
+    pivot=Y(LV,EV);
+    Y(LV,:)=Y(LV,:)/pivot;
+    for i=1:m
+        if i~=LV
+            Y(i,:)=Y(i,:)-Y(i,EV)*Y(LV,:);
+        end
+    end
+end
