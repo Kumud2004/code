@@ -1,0 +1,49 @@
+clc;
+clear;
+cost=[11 13 17 14;
+    16 18 14 10;
+    21 24 13 10;];% original(not balanced yet)
+supply=[10 5 9];
+demand=[8 7 15 4];
+[m,n]=size(cost);
+%m->no. of sources
+%n->no. of destinations
+S=sum(supply);
+D=sum(demand);
+if(S==D)
+    disp('Problem is balanced')
+elseif(S<D)
+    cost(end+1,:)=zeros(1,n);% in place of end we can also write m
+    supply(end+1)=D-S;
+else
+    cost(:,end+1)=zeros(m,1);% in place of end we can also write n
+    demand(end+1) = S-D;
+end
+disp("Balanced TP:")
+table=[cost supply';demand sum(supply)];
+disp(table)
+
+[m,n]=size(cost);%of balanced TP
+X=zeros(m,n);%initialization of bfs(soution)
+I_cost=cost;%I_cost is initial cost matrix
+while(any(supply~=0)||any(demand~=0))
+    min_cost=min(cost(:));% will give min from whole matrix
+    [r,c]=find(cost==min_cost);% to find all the cells where we can allocate...r will give row indices and c will give column indices
+    y=min(supply(r),demand(c));
+    [alloc,index]=max(y);
+    rr=r(index);
+    cc=c(index);
+    X(rr,cc)=alloc;
+    supply(rr)=supply(rr)-alloc;
+    demand(cc)=demand(cc)-alloc;
+    cost(rr,cc)=inf;
+end
+
+cost_ec=X.*I_cost;
+final_cost=sum(cost_ec(:));
+disp("Final Allocation Matrix:")
+disp(X)
+disp("Total Transportation Cost:")
+disp(final_cost)
+
+
