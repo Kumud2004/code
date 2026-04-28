@@ -1,0 +1,79 @@
+%Steepest Descent Method(Gradient method)
+%search technique used to find out the min/max of a function of n variables
+%min f(x1,x2,...,xn)...function is given
+%it is an iterative technique
+%X0(x10,x20,...,xn0) is initial approximation(given)
+%tolerance is given
+%stopping criterias:
+%1)|f(Xi+1)-f(Xi)|<=tol
+%2)||Xi+1 - Xi||<=tol(infinity norm or l2 norm)...function is norm(e,inf)
+%3)|df/dXi|<=tol , for all i
+
+%X1=X0+lambda0*S0
+%where, S1 is the direction and lambda1 is the step size
+%S0=-gradient(f)
+
+%Gradient(f(x))=(df/dx1,df/dx2,...,df/dxn)
+
+%if function is max ...convert to min with -coeficients
+%        or take S0=gradient(f)
+
+%X0,f(X0),gradient(f(X0)),S0=-gradient(f(X0)),X1=X0+lamda0*S0,f(X1)->it is a single variable function
+
+%min f(x)
+
+%we get X1, check stoppping criteria
+
+%by default, we get answer upto 4 decimal places(format short)
+%to get more decimal places, write format long
+%syms x1,x2...these will be treaed as symbolic variables
+%    to use gradient function , we have used syms..so we have to use inline to put vaue in symbolic variables
+%f1 is just a statement 
+%fx is function
+%gard->gradint->inbuilt function
+%if we dont use syms, we will have to caluculate gradient and h on our own, which would be very lengthy
+
+% CODE FOR STEEPEST DESCENT METHOD
+% QUESTIION IS - PERFORM 4 ITERATIONS OF STEEPEST DESCENT ALGORITHM TO MINIMIZE
+% f(x1,x2)=x1-x2+2x1^2+2x1x2+x2^2
+% Starting from the point X1=[1,1]
+
+format short % Display output upto 4 digits
+clear all    % clear all the stored values
+clc          % Clear the screen
+
+%% Phase 1- Define objective function
+syms x1 x2
+f1 = x1 - x2 + 2*x1^2 + 2*x1*x2 + x2^2;
+fx = inline(f1); % to convert f1 into a function of x1 and x2.
+fobj = @(x) fx(x(:,1), x(:,2)); % convert the function in one variable
+
+%% Phase 2- Compute gradient of f
+grad = gradient(f1);
+G = inline(grad); % to convert grad into a function of x1 and x2.
+gradx = @(x) G(x(:,1), x(:,2)); % convert the function in one variable
+
+%% Phase 3- Compute Hessian Matrix
+H1 = hessian(f1);
+Hx = inline(H1); % to convert H1 into a function
+
+%% Phase 4- Iterations
+x0 = [1 1]; % given initial value of x1 x2
+maxiter = 4; % maximum number of iteration
+tol = 10^(-3); % maximum tolerance or error in our answer
+iter = 0; % iteration counter / initial counter
+X = []; % initial vector array
+
+while norm(gradx(x0)) > tol && iter < maxiter
+    X = [X; x0]; % save all vectors
+    S = -gradx(x0); % compute gradient at X
+    H = Hx(x0); % compute Hessian at X
+    lambda = S'*S ./ (S'*H*S); % compute lambda
+    Xnew = x0 + lambda.*S'; % update X
+    x0 = Xnew; % save new X
+    iter = iter + 1; % update iteration number
+end
+
+%% Phase 5- Print the solution
+fprintf('Optimal Solution X=[%f, %f]\n', x0(1), x0(2))
+fprintf('Optimal Value f(x)= %f \n', fobj(x0))
